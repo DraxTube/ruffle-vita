@@ -1,25 +1,21 @@
-name: Build Ruffle Vita Core
+name: Build PS Vita VPK
 on: push
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Ruffle Source
+      - name: Checkout Your Code
         uses: actions/checkout@v3
-        with:
-          repository: ruffle-rs/ruffle
-          fetch-depth: 1
 
       - name: Install Rust Nightly
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly
           source $HOME/.cargo/env
-          # Installiamo i componenti necessari per compilare su altre piattaforme
           rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
 
-      - name: Build Core Only
+      - name: Build VPK Binary
         run: |
           source $HOME/.cargo/env
-          # Usiamo un comando speciale (-Z) che serve per le console 'sperimentali'
-          cargo +nightly build --package ruffle_core --target armv7-sony-vita-newlibeabihf --release --no-default-features -Z build-std=std,panic_abort
+          # Compiliamo il tuo progetto per PS Vita
+          cargo +nightly build --target armv7-sony-vita-newlibeabihf --release -Z build-std=std,panic_abort
