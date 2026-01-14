@@ -12,6 +12,7 @@
     "llvm-target": "armv7a-sony-vita-newlibeabihf",
     "max-atomic-width": 64,
     "os": "vita",
+    "target-family": "unix",
     "panic-strategy": "abort",
     "relocation-model": "static",
     "target-c-int-width": 32,
