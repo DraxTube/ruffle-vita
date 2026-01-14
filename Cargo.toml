@@ -4,12 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# Il cuore di Ruffle. Usiamo la versione base senza fronzoli per velocizzare
+# Il cuore di Ruffle
 ruffle_core = { git = "https://github.com/ruffle-rs/ruffle", default-features = false }
 
-# Librerie per comunicare con l'hardware PS Vita
+# Libreria base per PS Vita
 psp2-sys = "0.1"
-vita-newlib-reent = "0.1"
 
 [profile.release]
 panic = "abort"
