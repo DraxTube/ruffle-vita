@@ -17,5 +17,7 @@ jobs:
       - name: Build VPK Binary
         run: |
           source $HOME/.cargo/env
-          # Compiliamo il tuo progetto per PS Vita
+          # Aggiorna le dipendenze per essere sicuri di avere l'ultima versione di Ruffle
+          cargo +nightly update
+          # Compilazione specifica per PS Vita
           cargo +nightly build --target armv7-sony-vita-newlibeabihf --release -Z build-std=std,panic_abort
