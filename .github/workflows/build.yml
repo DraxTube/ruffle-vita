@@ -11,25 +11,21 @@ jobs:
 
       - name: Install Rust Toolchain
         run: |
-          # Pulizia: rimuoviamo toolchain residue che causano conflitti
-          rm -rf /github/home/.rustup/toolchains/*
-          
-          # Installazione pulita della Nightly GNU
+          # Eliminiamo la toolchain musl che crea conflitti
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly-x86_64-unknown-linux-gnu
-          
-          # Aggiungiamo i percorsi al sistema di GitHub
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Build VPK Binary
         run: |
-          # Carichiamo l'ambiente
           export PATH="$HOME/.cargo/bin:$PATH"
           source $HOME/.cargo/env
           
-          # Aggiungiamo i sorgenti necessari per compilare per la Vita
+          # Rimuoviamo forzatamente la toolchain sbagliata se esiste ancora
+          rustup toolchain uninstall nightly-x86_64-unknown-linux-musl || true
+          
           rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
           
-          # Compilazione usando il file JSON corretto
+          # Compilazione
           cargo +nightly build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
