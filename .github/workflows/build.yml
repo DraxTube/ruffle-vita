@@ -1,0 +1,24 @@
+name: Build Ruffle Vita Core
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Ruffle Source
+        uses: actions/checkout@v3
+        with:
+          repository: ruffle-rs/ruffle
+          fetch-depth: 1 # Scarica solo l'ultima versione, velocissimo
+
+      - name: Install Rust and Vita Target
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          source $HOME/.cargo/env
+          rustup target add armv7-sony-vita-newlibeabihf
+
+      - name: Build Core Only
+        run: |
+          source $HOME/.cargo/env
+          # Compiliamo solo il 'core', che è il cuore dell'emulatore
+          cargo build --package ruffle_core --target armv7-sony-vita-newlibeabihf --release --no-default-features
