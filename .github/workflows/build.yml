@@ -11,19 +11,25 @@ jobs:
 
       - name: Install Rust Toolchain
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly
+          # Pulizia: rimuoviamo toolchain residue che causano conflitti
+          rm -rf /github/home/.rustup/toolchains/*
+          
+          # Installazione pulita della Nightly GNU
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly-x86_64-unknown-linux-gnu
+          
+          # Aggiungiamo i percorsi al sistema di GitHub
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Build VPK Binary
         run: |
+          # Carichiamo l'ambiente
+          export PATH="$HOME/.cargo/bin:$PATH"
           source $HOME/.cargo/env
+          
+          # Aggiungiamo i sorgenti necessari per compilare per la Vita
           rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
           
-          # Spieghiamo a Rust dove trovare il compilatore C della Vita
-          export VITA_PBP_TOOL=vita-make-fself
-          export PKG_CONFIG_ALLOW_CROSS=1
-          
-          # Compiliamo usando il FILE JSON come target
+          # Compilazione usando il file JSON corretto
           cargo +nightly build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
