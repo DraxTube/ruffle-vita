@@ -4,7 +4,6 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Rimuoviamo il container per ora per evitare conflitti di permessi
     steps:
       - name: Checkout Your Code
         uses: actions/checkout@v3
@@ -13,12 +12,12 @@ jobs:
         uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: nightly
-          targets: armv7-sony-vita-newlibeabihf
+          # Non aggiungiamo 'targets' qui perché lo costruiamo da soli sotto
           components: rust-src
 
       - name: Build VPK Binary
         run: |
-          # Usiamo il comando cargo direttamente, ora DEVE trovarlo
+          # Diciamo a Rust di costruirsi da solo i pezzi per la Vita usando i sorgenti (rust-src)
           cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
