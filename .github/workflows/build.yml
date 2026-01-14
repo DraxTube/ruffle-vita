@@ -4,26 +4,22 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: vitasdk/vitasdk:latest
+    # Rimuoviamo il container per ora per evitare conflitti di permessi
     steps:
       - name: Checkout Your Code
         uses: actions/checkout@v3
 
-      - name: Install and Build
+      - name: Install Rust Nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly
+          targets: armv7-sony-vita-newlibeabihf
+          components: rust-src
+
+      - name: Build VPK Binary
         run: |
-          # 1. Installazione Rust
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly-x86_64-unknown-linux-gnu
-          
-          # 2. Esportiamo i percorsi per questa sessione e per le successive
-          export PATH="$HOME/.cargo/bin:$PATH"
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          
-          # 3. Preparazione target
-          $HOME/.cargo/bin/rustup component add rust-src
-          
-          # 4. COMPILAZIONE
-          # Puntiamo direttamente al binario nella cartella di installazione
-          $HOME/.cargo/bin/cargo build \
+          # Usiamo il comando cargo direttamente, ora DEVE trovarlo
+          cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
             --release
