@@ -14,29 +14,35 @@ jobs:
           toolchain: nightly
           components: rust-src
 
-      - name: Install VitaSDK & Libraries
+      - name: Install VitaSDK & Core Libs
         run: |
+          # Installiamo il supporto per i file .xz
           sudo apt-get update && sudo apt-get install -y xz-utils
+          
           export VITASDK=/opt/vitasdk
           sudo mkdir -p $VITASDK
           sudo chown $USER $VITASDK
+          
+          # Scarichiamo la toolchain
           DOWNLOAD_LINK=$(curl -sL https://github.com/vitasdk/vita-headers/raw/master/.travis.d/last_built_toolchain.py | python3 - master linux)
           curl -L "$DOWNLOAD_LINK" | tar xj -C $VITASDK --strip-components=1
           
           echo "VITASDK=$VITASDK" >> $GITHUB_ENV
           echo "$VITASDK/bin" >> $GITHUB_PATH
           
+          # Scarichiamo VDPM e installiamo le librerie stub
           mkdir -p $VITASDK/bin
           curl -L https://raw.githubusercontent.com/vitasdk/vdpm/master/vdpm -o $VITASDK/bin/vdpm
           chmod +x $VITASDK/bin/vdpm
-          # Installiamo newlib che contiene le definizioni base
+          
+          # Questo passaggio è fondamentale per creare i file .a che mancano
+          $VITASDK/bin/vdpm vita-headers
           $VITASDK/bin/vdpm newlib
 
       - name: Build VPK Binary
         run: |
-          # Aggiungiamo i percorsi corretti per le librerie della Vita
-          # NOTA: Usiamo -L sia per la cartella lib che per arm-vita-eabi/lib
-          export RUSTFLAGS="-L /opt/vitasdk/arm-vita-eabi/lib -L /opt/vitasdk/lib -lSceKernel_stub -lSceLibc_stub -lSceNet_stub"
+          # Usiamo il percorso assoluto della toolchain per le librerie
+          export RUSTFLAGS="-L /opt/vitasdk/arm-vita-eabi/lib -lSceKernel_stub -lSceLibc_stub -lSceNet_stub"
           
           cargo build \
             -Z build-std=std,panic_abort \
