@@ -11,7 +11,7 @@ jobs:
 
       - name: Install Rust Toolchain
         run: |
-          # Eliminiamo la toolchain musl che crea conflitti
+          # Installazione forzata della versione corretta
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly-x86_64-unknown-linux-gnu
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
@@ -20,13 +20,16 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           source $HOME/.cargo/env
           
-          # Rimuoviamo forzatamente la toolchain sbagliata se esiste ancora
-          rustup toolchain uninstall nightly-x86_64-unknown-linux-musl || true
+          # Forziamo l'uso della toolchain corretta eliminando quella sbagliata dal percorso
+          rm -rf /github/home/.rustup/toolchains/nightly-x86_64-unknown-linux-musl
           
-          rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+          # Impostiamo la variabile di ambiente per obbligare Rust a usare GNU
+          export RUSTUP_TOOLCHAIN=nightly-x86_64-unknown-linux-gnu
+          
+          rustup component add rust-src
           
           # Compilazione
-          cargo +nightly build \
+          cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
             --release
