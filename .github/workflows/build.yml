@@ -11,22 +11,20 @@ jobs:
 
       - name: Install Rust Toolchain
         run: |
-          # Installiamo Rust forzando la versione corretta (gnu) invece di musl
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly-x86_64-unknown-linux-gnu
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Build VPK Binary
         run: |
-          # Carichiamo l'ambiente Rust
           source $HOME/.cargo/env
-          
-          # Aggiungiamo il supporto per PS Vita e i sorgenti di Rust
-          rustup target add armv7-sony-vita-newlibeabihf --toolchain nightly-x86_64-unknown-linux-gnu
           rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
           
-          # Compilazione
-          export RUSTFLAGS="-C target-feature=+v7,+vfp3,+thumb2"
-          cargo +nightly-x86_64-unknown-linux-gnu build \
+          # Spieghiamo a Rust dove trovare il compilatore C della Vita
+          export VITA_PBP_TOOL=vita-make-fself
+          export PKG_CONFIG_ALLOW_CROSS=1
+          
+          # Compiliamo usando il FILE JSON come target
+          cargo +nightly build \
             -Z build-std=std,panic_abort \
-            --target armv7-sony-vita-newlibeabihf \
+            --target armv7-sony-vita-newlibeabihf.json \
             --release
