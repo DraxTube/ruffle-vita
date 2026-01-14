@@ -12,12 +12,13 @@ jobs:
         uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: nightly
-          # Non aggiungiamo 'targets' qui perché lo costruiamo da soli sotto
           components: rust-src
 
       - name: Build VPK Binary
         run: |
-          # Diciamo a Rust di costruirsi da solo i pezzi per la Vita usando i sorgenti (rust-src)
+          # Impostiamo una variabile per dire a Ruffle di non usare funzioni desktop
+          export RUSTFLAGS="--cfg ruffle_core='no_precomputed_hashes'"
+          
           cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
