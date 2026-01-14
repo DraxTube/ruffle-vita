@@ -8,25 +8,31 @@ jobs:
       - name: Checkout Your Code
         uses: actions/checkout@v3
 
-      # 1. Installiamo Rust (questo funziona benissimo ora)
+      # 1. Installiamo Rust (confermato che funziona)
       - name: Install Rust Nightly
         uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: nightly
           components: rust-src
 
-      # 2. Installiamo gli strumenti PS Vita (Linker e SDK)
-      # Questo installerà 'arm-vita-eabi-gcc' nel sistema
+      # 2. Installiamo VitaSDK manualmente (Metodo infallibile)
       - name: Install VitaSDK
-        uses: vitasdk/action-install-vitasdk@v1
-        with:
-          binaries: true
-          vitasdk_release: "latest"
+        run: |
+          # Scarichiamo l'ultima versione stabile del kit di sviluppo
+          wget -O vitasdk.tar.bz2 https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1145/vitasdk-x86_64-linux-gnu-2023-01-20_18-50-25.tar.bz2
+          
+          # Creiamo la cartella e estraiamo i file
+          mkdir -p $HOME/vitasdk
+          tar -xjf vitasdk.tar.bz2 -C $HOME/vitasdk --strip-components=1
+          
+          # Aggiungiamo i binari al percorso di sistema così Rust li trova
+          echo "$HOME/vitasdk/bin" >> $GITHUB_PATH
+          echo "VITASDK=$HOME/vitasdk" >> $GITHUB_ENV
 
-      # 3. Compilazione Finale
+      # 3. Compilazione
       - name: Build VPK Binary
         run: |
-          # Ora che abbiamo sia Rust che VitaSDK, lanciamo la magia
+          # Ora 'arm-vita-eabi-gcc' è nel PATH, quindi il Linking funzionerà
           cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
