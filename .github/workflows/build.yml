@@ -14,20 +14,24 @@ jobs:
           toolchain: nightly
           components: rust-src
 
-      # Installiamo VitaSDK scaricando il pacchetto pre-compilato aggiornato
-      - name: Install VitaSDK
+      - name: Setup VitaSDK
         run: |
-          mkdir -p $HOME/vitasdk
-          # Scarichiamo l'ultima build stabile per Linux x64
-          curl -L https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1149/vitasdk-x86_64-linux-gnu-2023-01-20_18-50-25.tar.bz2 | tar -xj -C $HOME/vitasdk --strip-components=1
+          # Creiamo la cartella per il kit di sviluppo
+          export VITASDK=/opt/vitasdk
+          sudo mkdir -p $VITASDK
+          sudo chown $USER $VITASDK
           
-          # Esportiamo i percorsi
-          echo "VITASDK=$HOME/vitasdk" >> $GITHUB_ENV
-          echo "$HOME/vitasdk/bin" >> $GITHUB_PATH
+          # Scarichiamo l'installer ufficiale (quello che contiene lo script che hai visto tu)
+          curl -L https://raw.githubusercontent.com/vitasdk/vdpm/master/bootstrap-vitasdk.sh | bash
+          
+          # Configuriamo le variabili d'ambiente
+          echo "VITASDK=$VITASDK" >> $GITHUB_ENV
+          echo "$VITASDK/bin" >> $GITHUB_PATH
 
       - name: Build VPK Binary
         run: |
-          # Ora arm-vita-eabi-gcc è disponibile per il linking
+          # Ora usiamo i binari installati
+          # -Z build-std compila la libreria standard di Rust per la Vita
           cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
