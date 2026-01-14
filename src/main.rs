@@ -1,10 +1,9 @@
 use vitasdk_sys as libvita;
 
-// Definiamo la memoria per la PS Vita
+// Definiamo correttamente la variabile per la memoria della PS Vita
 #[no_mangle]
-pub var_vita_memory_threshold: u32 = 0; // Usa il default del sistema
+pub static var_vita_memory_threshold: u32 = 0; 
 
 fn main() {
     println!("Ruffle PS Vita Starting...");
-    // Qui andrà il loop di Ruffle
 }
