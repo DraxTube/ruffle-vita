@@ -11,23 +11,19 @@ jobs:
 
       - name: Install and Build
         run: |
-          # 1. Installazione pulita di Rust
+          # 1. Installazione Rust
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly-x86_64-unknown-linux-gnu
           
-          # 2. Carichiamo Rust nel "percorso" del sistema
-          source $HOME/.cargo/env
+          # 2. Esportiamo i percorsi per questa sessione e per le successive
           export PATH="$HOME/.cargo/bin:$PATH"
-          export RUSTUP_TOOLCHAIN=nightly-x86_64-unknown-linux-gnu
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
           
-          # 3. Pulizia toolchain sbagliata
-          rm -rf /github/home/.rustup/toolchains/nightly-x86_64-unknown-linux-musl || true
+          # 3. Preparazione target
+          $HOME/.cargo/bin/rustup component add rust-src
           
-          # 4. Aggiungiamo i pezzi per la Vita
-          rustup component add rust-src
-          
-          # 5. COMPILAZIONE VERA E PROPRIA
-          # Questo comando userà il tuo file JSON e inizierà a scaricare Ruffle
-          cargo build \
+          # 4. COMPILAZIONE
+          # Puntiamo direttamente al binario nella cartella di installazione
+          $HOME/.cargo/bin/cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
             --release
