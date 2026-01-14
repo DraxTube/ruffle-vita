@@ -4,17 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# Il cuore di Ruffle che abbiamo testato prima
+# Il cuore di Ruffle. Usiamo la versione base senza fronzoli per velocizzare
 ruffle_core = { git = "https://github.com/ruffle-rs/ruffle", default-features = false }
 
-# Librerie specifiche per far parlare Rust con la PS Vita
+# Librerie per comunicare con l'hardware PS Vita
 psp2-sys = "0.1"
 vita-newlib-reent = "0.1"
-
-[lib]
-crate-type = ["staticlib"]
 
 [profile.release]
 panic = "abort"
 lto = true
 opt-level = 3
+codegen-units = 1
