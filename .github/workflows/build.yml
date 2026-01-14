@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Rust Nightly
         uses: dtolnay/rust-toolchain@nightly
@@ -14,16 +14,25 @@ jobs:
           toolchain: nightly
           components: rust-src
 
-      # Questo è il metodo "corazzato". Non scarica file a caso, usa l'installer ufficiale.
-      - name: Setup VitaSDK
-        uses: vitasdk/setup-vitasdk@v5
-
-      - name: Build Ruffle
+      - name: Install VitaSDK (Link Diretto Funzionante)
         run: |
-          # Qui diciamo a Rust dove l'installer ha messo i file
-          export VITA_HEADERS=$VITASDK/arm-vita-eabi/include
-          export RUSTFLAGS="-L $VITASDK/arm-vita-eabi/lib -lSceKernel_stub -lSceLibc_stub -lSceNet_stub"
+          # Creiamo la cartella per il SDK
+          mkdir -p $HOME/vitasdk
           
+          # Scarichiamo il pacchetto già compilato (evitiamo lo script build_internal.sh)
+          # Uso un link stabile dalle release ufficiali di VitaSDK
+          curl -L https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1149/vitasdk-x86_64-linux-gnu-2023-01-20_18-50-25.tar.bz2 | tar -xj -C $HOME/vitasdk --strip-components=1
+          
+          # Aggiungiamo i percorsi al sistema
+          echo "VITASDK=$HOME/vitasdk" >> $GITHUB_ENV
+          echo "$HOME/vitasdk/bin" >> $GITHUB_PATH
+
+      - name: Build Ruffle per PS Vita
+        run: |
+          # Definiamo dove sono i file .a (SceKernel, SceLibc, ecc.)
+          export RUSTFLAGS="-L $HOME/vitasdk/arm-vita-eabi/lib -lSceKernel_stub -lSceLibc_stub -lSceNet_stub"
+          
+          # Lanciamo la compilazione vera e propria
           cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
