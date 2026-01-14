@@ -16,7 +16,7 @@ jobs:
 
       - name: Install VitaSDK & Libraries
         run: |
-          # 1. Installazione Compilatore (Logic dal tuo script precedente)
+          # 1. Installazione Compilatore (Questa parte funziona!)
           export VITASDK=/opt/vitasdk
           sudo mkdir -p $VITASDK
           sudo chown $USER $VITASDK
@@ -28,14 +28,19 @@ jobs:
           echo "$VITASDK/bin" >> $GITHUB_PATH
           export PATH="$VITASDK/bin:$PATH"
 
-          # 3. Installazione librerie dalla tua lista (usando VDPM)
-          # Installiamo quelle indispensabili per la grafica e i dati
-          curl -L https://raw.githubusercontent.com/vitasdk/vdpm/master/bootstrap-vitasdk.sh | bash
-          vdpm zlib libpng freetype openssl
+          # 3. Installazione VDPM manuale (per evitare l'errore del file mancante)
+          # Invece di lanciare il bootstrap, scarichiamo solo lo script vdpm
+          mkdir -p $VITASDK/bin
+          curl -L https://raw.githubusercontent.com/vitasdk/vdpm/master/vdpm -o $VITASDK/bin/vdpm
+          chmod +x $VITASDK/bin/vdpm
+          
+          # 4. Installiamo le librerie dalla tua lista
+          # Usiamo il comando vdpm direttamente
+          $VITASDK/bin/vdpm zlib libpng freetype
 
       - name: Build VPK Binary
         run: |
-          # Compilazione Ruffle
+          # Se tutto è andato bene, qui inizia la build di Ruffle
           cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
