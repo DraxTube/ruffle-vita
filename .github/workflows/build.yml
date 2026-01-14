@@ -14,24 +14,15 @@ jobs:
           toolchain: nightly
           components: rust-src
 
-      - name: Install VitaSDK Pre-compiled
-        run: |
-          # Creiamo la cartella di destinazione
-          sudo mkdir -p /opt/vitasdk
-          sudo chown $USER /opt/vitasdk
-          
-          # Scarichiamo la build che contiene TUTTI i repository che hai elencato (già pronti)
-          # Questa è la release stabile v1149 per Linux
-          curl -L https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1149/vitasdk-x86_64-linux-gnu-2023-01-20_18-50-25.tar.bz2 | tar -xj -C /opt/vitasdk --strip-components=1
-          
-          # Configurazione variabili per Rust
-          echo "VITASDK=/opt/vitasdk" >> $GITHUB_ENV
-          echo "/opt/vitasdk/bin" >> $GITHUB_PATH
+      # Questo è il metodo "corazzato". Non scarica file a caso, usa l'installer ufficiale.
+      - name: Setup VitaSDK
+        uses: vitasdk/setup-vitasdk@v5
 
       - name: Build Ruffle
         run: |
-          # Puntiamo esattamente alle librerie stub scaricate
-          export RUSTFLAGS="-L /opt/vitasdk/arm-vita-eabi/lib -lSceKernel_stub -lSceLibc_stub -lSceNet_stub"
+          # Qui diciamo a Rust dove l'installer ha messo i file
+          export VITA_HEADERS=$VITASDK/arm-vita-eabi/include
+          export RUSTFLAGS="-L $VITASDK/arm-vita-eabi/lib -lSceKernel_stub -lSceLibc_stub -lSceNet_stub"
           
           cargo build \
             -Z build-std=std,panic_abort \
