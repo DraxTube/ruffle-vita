@@ -14,24 +14,28 @@ jobs:
           toolchain: nightly
           components: rust-src
 
-      - name: Setup VitaSDK
+      - name: Install VitaSDK & Libraries
         run: |
-          # Creiamo la cartella per il kit di sviluppo
+          # 1. Installazione Compilatore (Logic dal tuo script precedente)
           export VITASDK=/opt/vitasdk
           sudo mkdir -p $VITASDK
           sudo chown $USER $VITASDK
+          DOWNLOAD_LINK=$(curl -sL https://github.com/vitasdk/vita-headers/raw/master/.travis.d/last_built_toolchain.py | python3 - master linux)
+          curl -L "$DOWNLOAD_LINK" | tar xj -C $VITASDK --strip-components=1
           
-          # Scarichiamo l'installer ufficiale (quello che contiene lo script che hai visto tu)
-          curl -L https://raw.githubusercontent.com/vitasdk/vdpm/master/bootstrap-vitasdk.sh | bash
-          
-          # Configuriamo le variabili d'ambiente
+          # 2. Configurazione percorsi
           echo "VITASDK=$VITASDK" >> $GITHUB_ENV
           echo "$VITASDK/bin" >> $GITHUB_PATH
+          export PATH="$VITASDK/bin:$PATH"
+
+          # 3. Installazione librerie dalla tua lista (usando VDPM)
+          # Installiamo quelle indispensabili per la grafica e i dati
+          curl -L https://raw.githubusercontent.com/vitasdk/vdpm/master/bootstrap-vitasdk.sh | bash
+          vdpm zlib libpng freetype openssl
 
       - name: Build VPK Binary
         run: |
-          # Ora usiamo i binari installati
-          # -Z build-std compila la libreria standard di Rust per la Vita
+          # Compilazione Ruffle
           cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
