@@ -1,15 +1,10 @@
-#![no_std]
-#![no_main]
-
-// Usiamo la nuova libreria vitasdk
 use vitasdk_sys as libvita;
 
+// Definiamo la memoria per la PS Vita
 #[no_mangle]
-pub extern "C" fn main(_argc: i32, _argv: *mut *mut u8) -> i32 {
-    0
-}
+pub var_vita_memory_threshold: u32 = 0; // Usa il default del sistema
 
-#[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
-    loop {}
+fn main() {
+    println!("Ruffle PS Vita Starting...");
+    // Qui andrà il loop di Ruffle
 }
