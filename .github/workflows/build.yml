@@ -8,15 +8,25 @@ jobs:
       - name: Checkout Your Code
         uses: actions/checkout@v3
 
+      # 1. Installiamo Rust (questo funziona benissimo ora)
       - name: Install Rust Nightly
         uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: nightly
           components: rust-src
 
+      # 2. Installiamo gli strumenti PS Vita (Linker e SDK)
+      # Questo installerà 'arm-vita-eabi-gcc' nel sistema
+      - name: Install VitaSDK
+        uses: vitasdk/action-install-vitasdk@v1
+        with:
+          binaries: true
+          vitasdk_release: "latest"
+
+      # 3. Compilazione Finale
       - name: Build VPK Binary
         run: |
-          # Lanciamo la build senza flag complessi per ora
+          # Ora che abbiamo sia Rust che VitaSDK, lanciamo la magia
           cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
