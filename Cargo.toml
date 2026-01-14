@@ -4,14 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# Il cuore di Ruffle
+# Prendiamo solo il 'core' di Ruffle, senza le parti PC/Web
 ruffle_core = { git = "https://github.com/ruffle-rs/ruffle", default-features = false }
-
-# Libreria vitasdk
 vitasdk-sys = "0.1"
 
 [profile.release]
 panic = "abort"
 lto = true
 opt-level = 3
-codegen-units = 1
