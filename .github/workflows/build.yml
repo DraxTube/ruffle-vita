@@ -14,25 +14,17 @@ jobs:
           toolchain: nightly
           components: rust-src
 
-      - name: Install VitaSDK (Link Diretto Funzionante)
-        run: |
-          # Creiamo la cartella per il SDK
-          mkdir -p $HOME/vitasdk
-          
-          # Scarichiamo il pacchetto già compilato (evitiamo lo script build_internal.sh)
-          # Uso un link stabile dalle release ufficiali di VitaSDK
-          curl -L https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1149/vitasdk-x86_64-linux-gnu-2023-01-20_18-50-25.tar.bz2 | tar -xj -C $HOME/vitasdk --strip-components=1
-          
-          # Aggiungiamo i percorsi al sistema
-          echo "VITASDK=$HOME/vitasdk" >> $GITHUB_ENV
-          echo "$HOME/vitasdk/bin" >> $GITHUB_PATH
+      # Questa Action scarica il SDK da una cache sicura, non fallirà il download
+      - name: Setup VitaSDK
+        uses: G33X-Vita/setup-vitasdk@v2
+        with:
+          vitasdk-revision: 'master'
 
-      - name: Build Ruffle per PS Vita
+      - name: Build Ruffle
         run: |
-          # Definiamo dove sono i file .a (SceKernel, SceLibc, ecc.)
-          export RUSTFLAGS="-L $HOME/vitasdk/arm-vita-eabi/lib -lSceKernel_stub -lSceLibc_stub -lSceNet_stub"
+          # Usiamo le variabili impostate dall'Action
+          export RUSTFLAGS="-L $VITASDK/arm-vita-eabi/lib -lSceKernel_stub -lSceLibc_stub -lSceNet_stub"
           
-          # Lanciamo la compilazione vera e propria
           cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
