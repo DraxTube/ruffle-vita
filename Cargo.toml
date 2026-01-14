@@ -7,7 +7,7 @@ edition = "2021"
 # Il cuore di Ruffle
 ruffle_core = { git = "https://github.com/ruffle-rs/ruffle", default-features = false }
 
-# Nuova libreria per PS Vita (più aggiornata)
+# Libreria vitasdk
 vitasdk-sys = "0.1"
 
 [profile.release]
