@@ -5,7 +5,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Your Code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Install Rust Nightly
@@ -14,27 +14,23 @@ jobs:
           toolchain: nightly
           components: rust-src
 
-      - name: Install VitaSDK & Libraries
+      - name: Install VitaSDK Pre-compiled
         run: |
-          export VITASDK=/opt/vitasdk
-          sudo mkdir -p $VITASDK
-          sudo chown $USER $VITASDK
+          # Creiamo la cartella di destinazione
+          sudo mkdir -p /opt/vitasdk
+          sudo chown $USER /opt/vitasdk
           
-          # 1. Installazione Toolchain Base (GCC)
-          DOWNLOAD_LINK=$(curl -sL https://github.com/vitasdk/vita-headers/raw/master/.travis.d/last_built_toolchain.py | python3 - master linux)
-          curl -L "$DOWNLOAD_LINK" | tar xj -C $VITASDK --strip-components=1
+          # Scarichiamo la build che contiene TUTTI i repository che hai elencato (già pronti)
+          # Questa è la release stabile v1149 per Linux
+          curl -L https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1149/vitasdk-x86_64-linux-gnu-2023-01-20_18-50-25.tar.bz2 | tar -xj -C /opt/vitasdk --strip-components=1
           
-          # 2. Installazione manuale degli Stubs (i file .a che mancano)
-          # Scarichiamo i vita-headers pre-compilati direttamente
-          curl -L https://github.com/vitasdk/vita-headers/releases/download/master-v884/vita-headers-master-v884.tar.bz2 | tar xj -C $VITASDK --strip-components=1
-          
-          # 3. Configurazione percorsi
-          echo "VITASDK=$VITASDK" >> $GITHUB_ENV
-          echo "$VITASDK/bin" >> $GITHUB_PATH
+          # Configurazione variabili per Rust
+          echo "VITASDK=/opt/vitasdk" >> $GITHUB_ENV
+          echo "/opt/vitasdk/bin" >> $GITHUB_PATH
 
-      - name: Build VPK Binary
+      - name: Build Ruffle
         run: |
-          # Diciamo a Rust di guardare nella cartella dove abbiamo appena estratto gli stubs
+          # Puntiamo esattamente alle librerie stub scaricate
           export RUSTFLAGS="-L /opt/vitasdk/arm-vita-eabi/lib -lSceKernel_stub -lSceLibc_stub -lSceNet_stub"
           
           cargo build \
