@@ -16,9 +16,7 @@ jobs:
 
       - name: Build VPK Binary
         run: |
-          # Impostiamo una variabile per dire a Ruffle di non usare funzioni desktop
-          export RUSTFLAGS="--cfg ruffle_core='no_precomputed_hashes'"
-          
+          # Lanciamo la build senza flag complessi per ora
           cargo build \
             -Z build-std=std,panic_abort \
             --target armv7-sony-vita-newlibeabihf.json \
